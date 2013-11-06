@@ -1,0 +1,184 @@
+---
+title: Photo EXIF with rCharts + catcorrjs
+author: TimelyPortfolio
+github: {user: timelyportfolio, repo: rCharts_catcorrjs, branch: "gh-pages"}
+framework: bootstrap
+mode: selfcontained
+highlighter: prettify
+hitheme: twitter-bootstrap
+assets:
+  css:
+  - "http://fonts.googleapis.com/css?family=Raleway:300"
+  - "http://fonts.googleapis.com/css?family=Oxygen"
+---
+  
+<style>
+body{
+  font-family: 'Oxygen', sans-serif;
+  font-size: 8px;
+  line-height: 15px;
+}
+
+h1,h2,h3,h4 {
+font-family: 'Raleway', sans-serif;
+}
+
+.container { width: 1200px; }
+
+h3 {
+background-color: #D4DAEC;
+  text-indent: 100px; 
+}
+
+h4 {
+text-indent: 100px;
+}
+</style>
+  
+<a href="https://github.com/timelyportfolio/rCharts_catcorrjs"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+```{r message = F, warning = F, error = F, echo = F, tidy = F, cache = F}
+require(knitr)
+opts_chunk$set(
+  echo=T,
+  message = F,
+  warning = F,
+  error = F,
+  results = 'asis',
+  tidy = F,
+  cache = F,
+  fig.width = 8,
+  fig.height = 5,
+  rcharts="draft"
+)
+```
+
+# Photo EXIF Analysis | rCharts + catcorrjs
+
+#exiftools is really powerful
+#http://www.cameratechnica.com/2012/05/23/hack-your-exif-data-from-the-command-line-five-fun-uses-for-exiftool/
+
+
+#there are 2 R packages that purport to look at exif
+#adimpro but exif very limited and I could not get to work
+#plotKML but only for wikimedia commons images
+
+
+```{r}
+#hackiest way to do is just use exiftool through system
+#example to see full info on a single photo
+system('exiftool -h "../../../../2013-10 Disney/IMG_3555.JPG"')
+
+
+#examine iso across all
+iso.df <- data.frame(
+  system('exiftool -T -r -ISO "../../../../2013-10 Disney"',inter=TRUE),
+  stringsAsFactors = FALSE
+)
+#do a combination
+info <- system('exiftool -T -r -ISO -ShutterSpeed -CameraTemperature -DateTimeOriginal "../../../../2013-10 Disney"',inter=TRUE)
+img.df <- read.delim2(
+  textConnection(info),
+  stringsAsFactors = FALSE,
+  header = FALSE,
+  col.names = c("ISO", "ShutterSpeed", "CameraTemp", "Date")
+)
+#get just date
+img.df[,4] <- as.Date(#as.POSIXct(
+  paste0(
+    gsub(x=substr(img.df[,4],1,10),pattern=":",replacement="-"),
+    substr(img.df[,4],11,19)
+  )
+)
+img.df$id = 1:NROW(img.df)
+require(vcdExtra)
+mosaic(structable(img.df[,c(1,2)]))
+assoc(img.df[,c(1,2)],shade=T)
+#plot(x=img.df$ISO, y=lapply(img.df[,2],FUN=function(x){return(eval(parse(text=x)))}))
+
+```
+
+```{r}
+require(rCharts)
+
+#remove iso speeds that are not numeric
+#manual for now
+img.df <- img.df[-(which(is.na(as.numeric(img.df[,1])))),]
+img.df$Date <- format(img.df$Date)
+
+
+catCorrPlot <- function(questions, responses){
+  require(rCharts)
+  #responses = read.csv(responses_doc)
+  responses = toJSONArray(setNames(
+    responses[,-1], 1:(NCOL(responses) - 1)
+  ), json = F)
+  #questions = read.csv(questions_doc, stringsAsFactors = F)
+  questions = lapply(1:NROW(questions), function(i){
+    qi = as.list(questions[i,])
+    qi$choices = strsplit(qi$choices, ";")[[1]]
+    qi$number = i
+    qi
+  })
+  questions = toJSONArray(questions, json = F)
+  r1 <- rCharts$new()
+  r1$setLib('http://timelyportfolio.github.io/howitworks/catcorrjs/catcorrjs')
+  r1$set(questions = questions, responses = responses)
+  r1
+}
+
+responses <- img.df[,c(4,4,1,2)]
+questions <- do.call(rbind,lapply(1:2,function(x){
+  choices <- unique(img.df[,x])
+  choices <- choices[order(unlist(lapply(choices,function(x){
+    as.numeric(eval(parse(text=x)))
+  })))]
+  return(data.frame(
+      "outcome",
+      colnames(img.df)[x],
+      capture.output(cat(choices,sep=";")),
+      stringsAsFactors = F
+    )
+  )
+  }
+))
+colnames(questions) <- c("type","text","choices")
+questions <- rbind(questions,c("demographic","Date", capture.output(cat(unique(img.df[,4]),sep=";"))))
+questions <- questions[c(3,1,2),]   
+
+r1 <- catCorrPlot(questions, responses)
+r1
+```
+
+
+```{r}
+d1 <- dPlot(
+  x = "ISO",
+  y = "ShutterSpeed",
+  z = "Freq",
+  groups = c("ISO"),
+  data = subset(
+    data.frame(structable(ISO~ShutterSpeed, data = img.df)),
+    Freq > 0
+  ),
+  type = "bubble"
+)
+d1$yAxis(type = "addCategoryAxis")
+d1$zAxis(type = "addMeasureAxis", overrideMax = NROW(img.df)/1.5)
+d1
+
+d2 <- dPlot(
+  x = "ISO",
+  y = "Freq",
+  #z = "Freq",
+  groups = c("ShutterSpeed"),
+  data = subset(
+    data.frame(structable(ISO~ShutterSpeed, data = img.df)),
+    Freq > 0
+  ),
+  type = "bar"
+)
+d2$xAxis(orderRule = "ISO")
+#d2$yAxis(type = "addPctAxis")
+d2
+```

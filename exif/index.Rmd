@@ -55,8 +55,8 @@ opts_chunk$set(
   results = 'asis',
   tidy = F,
   cache = F,
-  fig.width = 10,
-  fig.height = 6,
+  fig.width = 12.5,
+  fig.height = 7.5,
   rcharts="draft"
 )
 ```
@@ -120,6 +120,7 @@ EXIF information is categorical data.  R users are fortunate to have the very fi
 ```{r}
 img.df$id = 1:NROW(img.df)
 require(vcdExtra)
+x11(width = 20, height = 12)
 mosaic(structable(img.df[,c(1,2)]))
 assoc(img.df[,c(1,2)],shade=T)
 #plot(x=img.df$ISO, y=lapply(img.df[,2],FUN=function(x){return(eval(parse(text=x)))}))

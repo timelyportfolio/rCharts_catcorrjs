@@ -110,6 +110,7 @@ EXIF information is categorical data.  R users are fortunate to have the very fi
 ```r
 img.df$id = 1:NROW(img.df)
 require(vcdExtra)
+x11(width = 20, height = 12)
 mosaic(structable(img.df[,c(1,2)]))
 ```
 
@@ -184,10 +185,10 @@ r1$show("inline")
 ```
 
 
-<div id = 'chart1ce01ece60c9' class = 'rChart catcorrjs'></div>
+<div id = 'chart1ce038ab52cf' class = 'rChart catcorrjs'></div>
 <script type='text/javascript'>
-var ccchart1ce01ece60c9 = catcorr("#chart1ce01ece60c9", {
- "dom": "chart1ce01ece60c9",
+var ccchart1ce038ab52cf = catcorr("#chart1ce038ab52cf", {
+ "dom": "chart1ce038ab52cf",
 "width":    800,
 "height":    400,
 "questions": [
@@ -2982,7 +2983,7 @@ var ccchart1ce01ece60c9 = catcorr("#chart1ce01ece60c9", {
 "3": "1/60" 
 } 
 ],
-"id": "chart1ce01ece60c9" 
+"id": "chart1ce038ab52cf" 
 });
 </script>
 

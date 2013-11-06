@@ -48,7 +48,7 @@ text-indent: 100px;
 
 
 
-# Photo EXIF Analysis | rCharts + catcorrjs
+# Photo EXIF Analysis | rCharts + catcorrjs + exiftool
 
 Building on my post [ISO Popularity on Flickr Explore](http://timelyportfolio.blogspot.com/2013/10/iso-popularity-on-flickr-explore.html), I thought I would use R to examine some of my family photos from a recent trip to Disney World.  Realizing that EXIF data is categorical, I also wanted to explore a different use for the new [`catcorrjs`](http://deanmalmgren.github.io/catcorrjs/) with [`rCharts`](http://rcharts.io/howitworks/catcorrjs).
 
@@ -185,10 +185,10 @@ r1$show("inline")
 ```
 
 
-<div id = 'chart1ce038ab52cf' class = 'rChart catcorrjs'></div>
+<div id = 'chart1ce0111108a' class = 'rChart catcorrjs'></div>
 <script type='text/javascript'>
-var ccchart1ce038ab52cf = catcorr("#chart1ce038ab52cf", {
- "dom": "chart1ce038ab52cf",
+var ccchart1ce0111108a = catcorr("#chart1ce0111108a", {
+ "dom": "chart1ce0111108a",
 "width":    800,
 "height":    400,
 "questions": [
@@ -2983,7 +2983,7 @@ var ccchart1ce038ab52cf = catcorr("#chart1ce038ab52cf", {
 "3": "1/60" 
 } 
 ],
-"id": "chart1ce038ab52cf" 
+"id": "chart1ce0111108a" 
 });
 </script>
 
